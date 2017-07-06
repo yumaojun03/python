@@ -32,18 +32,18 @@ class MyMQTTClass(Client):
         super(MyMQTTClass, self).__init__(client_id="test client", clean_session=False)
 
     def on_connect(self, client, obj, flags, rc):
-        logger.info("on connect, rc: %s" % rc)
+        logger.info("on connect, rc: %s, flags: %s" % (rc, flags))
 
         # 链接过后先处理sub
         client.subscribe(topic="test01", qos=2)
         client.subscribe(topic="test02", qos=2)
 
-        logger.info("start topic service...")
+        logger.info("start topic service1...")
         t1 = threading.Thread(target=pub_topic_test01, args=(client,))
         t1.start()
         self.worker1 = t1
 
-        logger.info("start topic service...")
+        logger.info("start topic service2...")
         t2 = threading.Thread(target=pub_topic_test02, args=(client,))
         t2.start()
         self.worker2 = t2
@@ -67,11 +67,10 @@ class MyMQTTClass(Client):
         logger.debug("subscribed <- ,mid: %s, qos: %s" %(mid, granted_qos))
 
     def on_log(self, mqttc, obj, level, string):
-        logger.debug("mqtt debug: %s" % string)
+        logger.debug("mqtt debug: %s, %s" % (level, string))
 
     def on_disconnect(self, client, userdata, rc):
         logger.info("disconnect: %s" % rc)
-        client.disconnect()
 
         while rc == 1:
             try:
